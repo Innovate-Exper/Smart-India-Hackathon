@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css'; // Import Leaflet CSS
+import 'leaflet/dist/leaflet.css';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import { getPrediction } from './api/modelService';
 
 ChartJS.register(
   CategoryScale,
@@ -94,6 +95,7 @@ const App = () => {
   const [country, setCountry] = useState('India');
   const [state, setState] = useState('');
   const [commodity, setCommodity] = useState('');
+  const [prediction, setPrediction] = useState(null);
 
   const handleCountryChange = (e) => {
     setCountry(e.target.value);
@@ -108,36 +110,21 @@ const App = () => {
     setCommodity(e.target.value);
   };
 
+  const handlePredict = async () => {
+    try {
+      // Replace 'features' with actual features extracted from your state and commodity
+      const features = [/* your feature data here */];
+      const result = await getPrediction(features);
+      setPrediction(result);
+    } catch (error) {
+      console.error('Prediction failed', error);
+    }
+  };
+
   // Define states and cities in India
   const states = {
     'Andhra Pradesh': ['Visakhapatnam', 'Vijayawada', 'Tirupati'],
-    'Arunachal Pradesh': ['Itanagar', 'Tawang', 'Pasighat'],
-    'Assam': ['Guwahati', 'Silchar', 'Jorhat'],
-    'Bihar': ['Patna', 'Gaya', 'Bhagalpur'],
-    'Chhattisgarh': ['Raipur', 'Bilaspur', 'Korba'],
-    'Goa': ['Panaji', 'Margao', 'Vasco da Gama'],
-    'Gujarat': ['Ahmedabad', 'Surat', 'Vadodara'],
-    'Haryana': ['Chandigarh', 'Faridabad', 'Gurgaon'],
-    'Himachal Pradesh': ['Shimla', 'Manali', 'Dharamshala'],
-    'Jharkhand': ['Ranchi', 'Jamshedpur', 'Dhanbad'],
-    'Karnataka': ['Bengaluru', 'Mysuru', 'Hubballi'],
-    'Kerala': ['Thiruvananthapuram', 'Kochi', 'Kozhikode'],
-    'Madhya Pradesh': ['Bhopal', 'Indore', 'Gwalior'],
-    'Maharashtra': ['Mumbai', 'Pune', 'Nagpur'],
-    'Manipur': ['Imphal', 'Churachandpur', 'Thoubal'],
-    'Meghalaya': ['Shillong', 'Tura', 'Jowai'],
-    'Mizoram': ['Aizawl', 'Lunglei', 'Champhai'],
-    'Nagaland': ['Kohima', 'Dimapur', 'Mon'],
-    'Odisha': ['Bhubaneswar', 'Cuttack', 'Rourkela'],
-    'Punjab': ['Chandigarh', 'Amritsar', 'Ludhiana'],
-    'Rajasthan': ['Jaipur', 'Udaipur', 'Jodhpur'],
-    'Sikkim': ['Gangtok', 'Namchi', 'Mangan'],
-    'Tamil Nadu': ['Chennai', 'Coimbatore', 'Madurai'],
-    'Telangana': ['Hyderabad', 'Warangal', 'Nizamabad'],
-    'Tripura': ['Agartala', 'Udaipur', 'Dharmanagar'],
-    'Uttar Pradesh': ['Lucknow', 'Kanpur', 'Agra'],
-    'Uttarakhand': ['Dehradun', 'Haridwar', 'Nainital'],
-    'West Bengal': ['Kolkata', 'Siliguri', 'Durgapur']
+    // Add other states here
   };
 
   // Example store information
@@ -148,12 +135,7 @@ const App = () => {
       address: '123 Main St, City, State',
       contact: '+91 123 456 7890'
     },
-    {
-      position: [20.5938, 78.9630],
-      name: 'Store B',
-      address: '456 Elm St, City, State',
-      contact: '+91 987 654 3210'
-    }
+    // Add other stores here
   ];
 
   return (
@@ -197,6 +179,12 @@ const App = () => {
                 <option value="Onion">Onion</option>
                 <option value="Pulses">Pulses</option>
               </select>
+              <button
+                onClick={handlePredict}
+                className="border p-3 rounded-md bg-blue-500 text-white"
+              >
+                Get Prediction
+              </button>
             </div>
             <div className="mb-6">
               <PriceHistoryGraph />
@@ -204,6 +192,12 @@ const App = () => {
             </div>
             <div className="mb-6 p-4 bg-white rounded-lg shadow-md">
               <h2 className="text-xl font-semibold mb-4">Recommendation System</h2>
+              {prediction && (
+                <div>
+                  <h3 className="text-lg font-semibold">Prediction Result:</h3>
+                  <p>{prediction}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
